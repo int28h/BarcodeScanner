@@ -11,6 +11,7 @@ import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
@@ -19,17 +20,28 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    BarcodeDetector barcodeDetector;
-    CameraSource cameraSource;
-    SurfaceView cameraView;
+public class MainActivity extends AppCompatActivity {
+    private String code = "notEmpty";
+
+    private BarcodeDetector barcodeDetector;
+    private CameraSource cameraSource;
+    private SurfaceView cameraView;
+    private Button scanButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         cameraView = findViewById(R.id.camera_view);
-        findViewById(R.id.button).setOnClickListener(MainActivity.this);
+
+        scanButton = findViewById(R.id.scan_button);
+        scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                code = "";
+                Log.e("CODE", " is empty");
+            }
+        });
 
         barcodeDetector = new BarcodeDetector.Builder(this)
                 .setBarcodeFormats(Barcode.ALL_FORMATS).build();
@@ -43,10 +55,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void receiveDetections(Detector.Detections detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-                //Log.e("SIZE", String.valueOf(barcodes.size()));
 
                 if(barcodes.size() != 0){
-                    Log.e("РАСПОЗНАНО", barcodes.valueAt(0).displayValue.toString());
+                    if(code.isEmpty()){
+                        code = barcodes.valueAt(0).displayValue.toString();
+                        Log.e("РАСПОЗНАНО, В БД", code);
+                    } else {
+                        Log.e("РАСПОЗНАНО", barcodes.valueAt(0).displayValue.toString());
+                    }
                 }
             }
         });
@@ -88,10 +104,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 cameraSource.stop();
             }
         });
-    }
-
-    @Override
-    public void onClick(View view) {
-
     }
 }
